@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{56e3f71a-582d-1971-fe6c-c1ed31a62e64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartConsole", "SmartConsole.csproj", "{a21d40e6-64a4-1b12-9ca9-3b379999a8f6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRelay", "SimpleRelay.csproj", "{dde2ad67-da9a-079c-544d-14d8a6e1c936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRelayUTP", "SimpleRelayUTP.csproj", "{76606d66-5861-f13c-8048-79100ffdc3f4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{40615604-ba20-1c32-b1d3-a17b3e091f1c}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56e3f71a-582d-1971-fe6c-c1ed31a62e64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56e3f71a-582d-1971-fe6c-c1ed31a62e64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{a21d40e6-64a4-1b12-9ca9-3b379999a8f6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{a21d40e6-64a4-1b12-9ca9-3b379999a8f6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{dde2ad67-da9a-079c-544d-14d8a6e1c936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{dde2ad67-da9a-079c-544d-14d8a6e1c936}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76606d66-5861-f13c-8048-79100ffdc3f4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76606d66-5861-f13c-8048-79100ffdc3f4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40615604-ba20-1c32-b1d3-a17b3e091f1c}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40615604-ba20-1c32-b1d3-a17b3e091f1c}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

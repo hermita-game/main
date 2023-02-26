@@ -1,0 +1,7 @@
+[submodule "website"]
+	path = website
+	url = https://github.com/hermita-game/hermita-game.github.io.git
+
+[submodule "docs"]
+	path = docs
+	url = https://github.com/hermita-game/docs.git
