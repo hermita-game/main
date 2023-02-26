@@ -54,12 +54,12 @@
      <None Include="Assets\External\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <Folder Include="Assets\External\TextMesh Pro\Sprites" />
-     <Folder Include="Assets\UI\sprites" />
+     <Folder Include="Assets\Samples\GUI\UI\sprites" />
      <Folder Include="Assets\Samples\Relay" />
      <Folder Include="Assets\External\TextMesh Pro\Resources\Sprite Assets" />
      <Folder Include="Assets\graphics" />
      <Folder Include="Assets\graphics\tiles" />
-     <Folder Include="Assets\UI\buttons" />
+     <Folder Include="Assets\Samples\GUI\UI\buttons" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
      <Folder Include="Assets\Scripts" />
      <Folder Include="Assets\Prefabs" />
@@ -77,7 +77,7 @@
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />
      <None Include="Assets\External\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
-     <Folder Include="Assets\UI\prefabs" />
+     <Folder Include="Assets\Samples\GUI\UI\prefabs" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_SDF.shader" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
      <None Include="Assets\External\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
@@ -91,9 +91,9 @@
      <Folder Include="Assets\External\TextMesh Pro\Fonts" />
      <Folder Include="Assets\graphics\fonts" />
      <None Include="Assets\External\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
-     <Folder Include="Assets\Import" />
+     <Folder Include="Assets\graphics\Rectangles" />
      <Folder Include="Assets\Scripts\Multiplayer" />
-     <Folder Include="Assets\UI" />
+     <Folder Include="Assets\Samples\GUI\UI" />
      <Folder Include="Assets\External" />
      <Folder Include="Assets\External\Smart Console\Sprites" />
      <None Include="Assets\External\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
