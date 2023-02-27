@@ -10,3 +10,6 @@
 /game/Build
 */.DS_Store
 [Aa]ssets/Plugins/Editor/JetBrains*
+/game/*.csproj
+/game/*.sln
+/game/*.suo
