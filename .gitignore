@@ -1,4 +1,6 @@
 # Unity project: /game/
+*.csproj
+*.sln
 /game/.idea
 /game/.vs
 /game/Library
@@ -10,6 +12,3 @@
 /game/Build
 */.DS_Store
 [Aa]ssets/Plugins/Editor/JetBrains*
-/game/*.csproj
-/game/*.sln
-/game/*.suo
