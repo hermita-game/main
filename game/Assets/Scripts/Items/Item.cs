@@ -14,6 +14,7 @@ namespace Items
         Armor,
         Necklace
     }
+    
     public class Item
     {
         public int Id;

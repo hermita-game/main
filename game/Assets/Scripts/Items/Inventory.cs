@@ -9,6 +9,8 @@ namespace Items
     {
         private readonly List<(Item item, int amount)> _items = new();
         private string filter = "all";
+        private string sort = "name";
+        private bool ascending = true;
 
         public List<(Item item, int amount)> Items =>
             filter switch
@@ -29,16 +31,48 @@ namespace Items
             Loot(5, 2, 1, 2, 0, 4, 1, 1, 0, 0, 3, 3, 3, 3, 1, 1, 2, 3, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 1, 2, 2, 1, 2,
                 1, 0, 0, 0, 0, 1,2,1,2,1,1,0,0,0,1,0,0,1,0,1,2,2,0,5,4,5,4,5,4,4,4,5);
             canvas.SetActive(false);
-            canvas.transform.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
-            canvas.transform.Find("Consumable").GetComponent<Button>().onClick.AddListener(() => Filter("consumable"));
-            canvas.transform.Find("Equipment").GetComponent<Button>().onClick.AddListener(() => Filter("equipment"));
-            canvas.transform.Find("Resource").GetComponent<Button>().onClick.AddListener(() => Filter("resource"));
+            var indexing = canvas.transform.Find("Indexing").transform;
+            indexing.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
+            indexing.Find("Consumable").GetComponent<Button>().onClick.AddListener(() => Filter("consumable"));
+            indexing.Find("Equipment").GetComponent<Button>().onClick.AddListener(() => Filter("equipment"));
+            indexing.Find("Resource").GetComponent<Button>().onClick.AddListener(() => Filter("resource"));
+            var sorting = canvas.transform.Find("Sorting").transform;
+            sorting.Find("ByName").GetComponent<Button>().onClick.AddListener(() => Sort("name"));
+            sorting.Find("ByTier").GetComponent<Button>().onClick.AddListener(() => Sort("tier"));
+            sorting.Find("ByAmount").GetComponent<Button>().onClick.AddListener(() => Sort("amount"));
             Show();
         }
         
         private void Filter(string filt)
         {
             filter = filt;
+            UpdateDisplay();
+        }
+        
+        private void Sort(string sortKey)
+        {
+            if (sortKey == sort)
+                ascending = !ascending;
+            else
+                ascending = true;
+            var order = ascending ? 1 : -1;
+            sort = sortKey;
+            var sorting  = sort switch
+            {
+                "name" => (Comparison<(Item item, int amount)>) ((a, b)
+                    => order * string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)),
+                // tier D > C > B > A > S, default : alphabetical order
+                "tier" => ((a, b)
+                    => order * a.item.Tier == b.item.Tier
+                        ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
+                        : b.item.Tier == 'S' ? 'A'-1 : b.item.Tier - a.item.Tier == 'S' ? 'A'-1 : a.item.Tier),
+                // default : alphabetical order
+                "amount" => ((a, b)
+                    => order * a.amount == b.amount
+                        ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
+                        : b.amount - a.amount),
+            };
+            _items.Sort(sorting);
             UpdateDisplay();
         }
 
