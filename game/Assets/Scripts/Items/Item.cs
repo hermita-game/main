@@ -8,6 +8,12 @@ using UnityEngine;
 
 namespace Items
 {
+    public enum StuffType
+    {
+        Wand,
+        Armor,
+        Necklace
+    }
     public class Item
     {
         public int Id;
@@ -29,11 +35,13 @@ namespace Items
     public class Equipment : Item
     {
         public Stats BaseStats;
+        public StuffType StuffType;
         
-        public Equipment(int id, string name, string description, char tier, Sprite icon, string stats)
+        public Equipment(int id, string name, string description, char tier, Sprite icon, StuffType type,  string stats)
             : base(id, name, description, tier, icon)
         {
             BaseStats = new Stats(stats);
+            StuffType = type;
         }
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, Stats stats)
