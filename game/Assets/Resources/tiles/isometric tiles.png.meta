@@ -5133,7 +5133,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      isometric tiles_58: 1874791924
+      isometric tiles_27: -1470575687
       isometric tiles_131: 1407719408
       isometric tiles_102: 1355729960
       isometric tiles_225: -1693687522
@@ -5370,8 +5370,8 @@ TextureImporter:
       isometric tiles_87: 1527994643
       isometric tiles_88: 407887525
       isometric tiles_36: -715093217
-      isometric tiles_27: -1470575687
       isometric tiles_51: -1666958599
+      isometric tiles_58: 1874791924
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
