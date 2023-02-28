@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Fighting;
 using UnityEngine;
 
@@ -33,6 +34,44 @@ namespace Items
             : base(id, name, description, tier, icon)
         {
             BaseStats = new Stats(stats);
+        }
+        
+        public Equipment(int id, string name, string description, char tier, Sprite icon, Stats stats)
+            : base(id, name, description, tier, icon)
+        {
+            BaseStats = stats;
+        }
+
+        public Equipment GetEquipmentInstance(int seed)
+        {
+            const float delta = 0.05f; // +-5% of base stat
+            var random = new System.Random(seed);
+            var newStats = new Stats();
+            foreach (var (key, (type, val)) in BaseStats.GetStats())
+                newStats[key] = (type, val * (1 + (float) random.NextDouble() * delta * 2 - delta));
+            return new Equipment(Id, Name, Description, Tier, Icon, newStats);
+        }
+        
+        public static void Apply(Stats player, List<Stats> equipment)
+        {
+            // Packing effects
+            var (percents, flats) = (new Stats(), new Stats());
+            foreach (var stats in equipment)
+            {
+                foreach (var (stat, (type, val)) in stats.GetStats())
+                {
+                    if (type == Type.Percent)
+                        percents[stat] = (Type.Percent, percents[stat].val + val);
+                    else
+                        flats[stat] = (Type.Flat, flats[stat].val + val);
+                }
+            }
+            
+            // Applying effects
+            foreach (var (stat, (type, val)) in percents.GetStats())
+                player[stat] = (Type.Flat, player[stat].val + player[stat].val * val / 100);
+            foreach (var (stat, (type, val)) in flats.GetStats())
+                player[stat] = (Type.Flat, player[stat].val + val);
         }
     }
     

@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private float moveH, moveV;
     [SerializeField] private float speed = 2f;
+    public Inventory inventory;
 
     private void Start()
     {

@@ -10,6 +10,15 @@ public enum Type
 
 namespace Fighting
 {
+    /* reference
+        hp: health points
+        mp: mana points
+        atk: attack
+        res: resistance
+        spd: speed
+        hp-regen: health points regeneration
+        mp-regen: mana points regeneration
+    */
     public class Stats
     {
         private readonly Dictionary<string, (Type type, float val)> _stats;
