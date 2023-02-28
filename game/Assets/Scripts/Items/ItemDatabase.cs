@@ -21,7 +21,7 @@ namespace Items
             {
                 new Equipment(0, "Wizard wand", "A wand used by wizards", 'D', set1[71], "hp +25%"),
                 new Equipment(1, "Mechanical wand", "A wand used by mechanical wizards", 'C', set1[73], "atk +50%"),
-                new Equipment(2, "Forest boss' arm", "A wand that formerly was the arm of the forest miniboss", 'D', set1[74], "atk +75%"),
+                new Equipment(2, "Forest boss' arm", "A wand that formerly was the arm of the forest miniboss", 'C', set1[74], "atk +75%"),
             };
         }
 
