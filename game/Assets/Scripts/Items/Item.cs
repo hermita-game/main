@@ -60,6 +60,7 @@ namespace Items
     {
         public Stats BaseStats;
         public StuffType StuffType;
+        public int Seed = 0;
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, StuffType type,  string stats)
             : base(id, name, description, tier, icon)
@@ -82,6 +83,7 @@ namespace Items
 
         public Equipment GetEquipmentInstance(int seed)
         {
+            Seed = seed;
             const float delta = 0.05f; // +-5% of base stat
             var random = new System.Random(seed);
             var newStats = new Stats();
