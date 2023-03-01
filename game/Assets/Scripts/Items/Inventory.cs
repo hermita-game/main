@@ -13,6 +13,7 @@ namespace Items
         private string _sort = "name";
         private bool _ascending = true;
         private bool _showing;
+        private GameObject _tooltip;
 
         private const KeyCode Key = KeyCode.I;
 
@@ -36,15 +37,17 @@ namespace Items
         public ItemDatabase db;
         public GameObject canvas;
 
-        // Start is called before the first frame update
         private void Start()
         {
+            _tooltip = canvas.transform.Find("Tooltip").gameObject;
+            _tooltip.SetActive(false);
+            canvas.SetActive(false);
+            
             Loot(5, 2, 1, 2, 0, 4, 1, 1, 0, 0, 3, 3, 3, 3, 1, 1, 2, 3, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 1, 2, 2, 1, 2,
                 1, 0, 0, 0, 0, 1,2,1,2,1,1,0,0,0,1,0,0,1,0,1,2,2,0,5,4,5,4,5,4,4,4,5);
             Loot((4, 5), (5, 6));
             Loot(6, 10);
             Loot(7, 15);
-            canvas.SetActive(false);
             var indexing = canvas.transform.Find("Indexing").transform;
             indexing.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
             indexing.Find("Consumable").GetComponent<Button>().onClick.AddListener(() => Filter("consumable"));
@@ -159,6 +162,7 @@ namespace Items
             
         private void UpdateDisplay()
         {
+            _tooltip.SetActive(true);
             var nbRows = (Items.Count - 1) / 6 + 1;
             var content = canvas.transform.Find("Scroll View").Find("Viewport").Find("Content");
             // Set the content's height to the number of rows
@@ -179,6 +183,7 @@ namespace Items
             // change scroll steps in scrollbar
             var scrollBar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
             scrollBar.numberOfSteps = Math.Max(1, nbRows - 4);
+            _tooltip.SetActive(false);
         }
 
         public List<(int, int)> ToSave()

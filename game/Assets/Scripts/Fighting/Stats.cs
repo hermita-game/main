@@ -77,5 +77,13 @@ namespace Fighting
                     result[key] = (type, Math.Min(val, ceiling[key].val));
             return result;
         }
+        
+        public override string ToString()
+        {
+            var result = "";
+            foreach (var (key, (type, val)) in GetStats())
+                result += $"{key} {(val > 0 ? "+" : "")}{Math.Round(val)}{(type == Type.Percent ? "%" : "")}\n";
+            return result;
+        }
     }
 }
