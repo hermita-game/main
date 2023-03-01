@@ -12,15 +12,15 @@ namespace Items
         private string _filter = "all";
         private string _sort = "name";
         private bool _ascending = true;
+        private bool _showing;
 
         private const KeyCode Key = KeyCode.I;
 
         private void Update()
         {
             if (!Input.GetKeyDown(Key)) return;
-            if (canvas.activeSelf) {
-                canvas.SetActive(false);
-            } else Show();
+            if (_showing) Hide();
+            else Show();
         }
 
         public List<(Item item, int amount)> Items =>
@@ -63,10 +63,8 @@ namespace Items
 
         private void Sort(string sortKey)
         {
-            if (sortKey == _sort)
+            if (_showing && sortKey == _sort)
                 _ascending = !_ascending;
-            else
-                _ascending = true;
             var order = _ascending ? 1 : -1;
             _sort = sortKey;
             
@@ -78,7 +76,7 @@ namespace Items
                     => order * (a.item.Tier == b.item.Tier
                         ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
                         : a.item.Tier - b.item.Tier),
-                "amount" => (a, b)
+                "amount" => (a, b) // ascending is descending here
                     => order * (a.amount == b.amount
                         ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
                         : b.amount - a.amount),
@@ -104,7 +102,7 @@ namespace Items
                 else
                     _items[index] = (item, _items[index].amount + amount);
             }
-            if (canvas.activeSelf)
+            if (_showing)
                 UpdateDisplay();
         }
     
@@ -149,11 +147,14 @@ namespace Items
         {
             canvas.SetActive(true);
             Sort(_sort);
-            UpdateDisplay();
+            _showing = true;
         }
         
         public void Hide()
-            => canvas.SetActive(false);
+        {
+            canvas.SetActive(false);
+            _showing = false;
+        }
             
         private void UpdateDisplay()
         {
