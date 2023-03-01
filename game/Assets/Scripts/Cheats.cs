@@ -1,5 +1,6 @@
 using Items;
 using SmartConsole;
+using UnityEngine;
 
 public class Cheats : CommandBehaviour
 {
@@ -11,5 +12,7 @@ public class Cheats : CommandBehaviour
     
     [Command]
     private static void give_item(int itemId, int amount)
-        => PlayerMovement.GetPlayer().GetComponent<Inventory>().Loot(itemId, amount);
+        => PlayerMovement.GetInventory().Loot(itemId, amount);
+
+    [Command] private static void hello_world() => Debug.Log("Hello World!");
 }

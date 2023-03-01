@@ -36,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
     }
     
     public static GameObject GetPlayer()
-    {
-        return GameObject.FindWithTag("Player");
-    }
+        => GameObject.FindWithTag("Player");
+    public static Inventory GetInventory()
+        => GetPlayer().GetComponent<Inventory>();
 }

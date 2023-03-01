@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public enum Type
-{
-    Percent, // Percent of base stat
-    Flat     // Flat value
-}
+
 
 namespace Fighting
 {
@@ -21,6 +17,11 @@ namespace Fighting
     */
     public class Stats
     {
+        public enum Type
+        {
+            Percent, // Percent of base stat
+            Flat     // Flat value
+        }
         private readonly Dictionary<string, (Type type, float val)> _stats;
     
         public (Type type, float val) this[string stat]

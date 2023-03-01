@@ -37,7 +37,7 @@ namespace Items
         public bool CanCraft(List<Item> inventory)
             => GetMissingIngredients(inventory).Count == 0;
         
-        public bool CanCraft(List<Item> inventory, out List<(int item, int amount)> missingIngredients)
+        public bool CanCraft(List<Item> inventory, out List<(int itemId, int amount)> missingIngredients)
         {
             missingIngredients = GetMissingIngredients(inventory);
             return missingIngredients.Count == 0;

@@ -19,7 +19,7 @@ namespace Items
             _recipes = new List<Recipe>
             {
                 new Recipe(
-                    0, 
+                    0,
                     "lab 1",
                     2,
                     new List<(int itemId, int amount)> { (6, 2), (7, 1) })

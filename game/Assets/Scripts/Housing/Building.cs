@@ -9,14 +9,21 @@ namespace Housing
         public Canvas canvas;
         
         // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
             canvas.enabled = false;
         }
 
-        void OnMouseDown()
+        private void OnMouseDown()
         {
-            canvas.enabled = true;
+            var position = transform.position;
+            var task = PlayerMovement.GetPlayer().GetComponent<PlayerMovement>().MoveTo(position.x, position.y);
+            task.ContinueWith(t =>
+            {
+                if (t.Result)
+                    canvas.enabled = true;
+                else Debug.Log($"No path to building {name}");
+            });
         }
     }
 }

@@ -98,18 +98,18 @@ namespace Items
             {
                 foreach (var (stat, (type, val)) in stats.GetStats())
                 {
-                    if (type == Type.Percent)
-                        percents[stat] = (Type.Percent, percents[stat].val + val);
+                    if (type == Stats.Type.Percent)
+                        percents[stat] = (Stats.Type.Percent, percents[stat].val + val);
                     else
-                        flats[stat] = (Type.Flat, flats[stat].val + val);
+                        flats[stat] = (Stats.Type.Flat, flats[stat].val + val);
                 }
             }
             
             // Applying effects
             foreach (var (stat, (type, val)) in percents.GetStats())
-                player[stat] = (Type.Flat, player[stat].val + player[stat].val * val / 100);
+                player[stat] = (Stats.Type.Flat, player[stat].val + player[stat].val * val / 100);
             foreach (var (stat, (type, val)) in flats.GetStats())
-                player[stat] = (Type.Flat, player[stat].val + val);
+                player[stat] = (Stats.Type.Flat, player[stat].val + val);
         }
     }
     
@@ -127,10 +127,10 @@ namespace Items
         {
             foreach (var (stat, (type, val)) in Stats.GetStats())
             {
-                if (type == Type.Flat)
-                    stats[stat] = (Type.Flat, stats[stat].val + val);
+                if (type == Stats.Type.Flat)
+                    stats[stat] = (Stats.Type.Flat, stats[stat].val + val);
                 else
-                    stats[stat] = (Type.Flat, stats[stat].val + maxStats[stat].val * val / 100);
+                    stats[stat] = (Stats.Type.Flat, stats[stat].val + maxStats[stat].val * val / 100);
             }
         }
     }
