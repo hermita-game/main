@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Items;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -9,7 +10,6 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private float moveH, moveV;
     [SerializeField] private float speed = 2f;
-    public Inventory inventory;
 
     private void Start()
     {
@@ -33,5 +33,10 @@ public class PlayerMovement : MonoBehaviour
         // true if a path was found, false otherwise
         // Task is done when movement is complete
         return Task.FromResult(true);
+    }
+    
+    public static GameObject GetPlayer()
+    {
+        return GameObject.FindWithTag("Player");
     }
 }
