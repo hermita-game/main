@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Items
 {
@@ -82,6 +84,27 @@ namespace Items
             var item = _items.First(item => item.Id == id);
             if (item is Equipment equipment)
                 return equipment.GetEquipmentInstance(Random.Range(0, 100000));
+            return item;
+        }
+        
+        public Item GetItem(string name)
+        {
+            var item = _items.First(item => item.Name == name);
+            if (item is Equipment equipment)
+                return equipment.GetEquipmentInstance(Random.Range(0, 100000));
+            return item;
+        }
+        
+        /*
+         <summary>
+            Get an item with a seed, if not equipment, seed is ignored
+         </summary>
+        */
+        public Item GetItem(int id, int seed)
+        {
+            var item = _items.First(item => item.Id == id);
+            if (item is Equipment equipment)
+                return equipment.GetEquipmentInstance(seed);
             return item;
         }
     }

@@ -8,7 +8,7 @@ namespace Items
 {
     public class Inventory : MonoBehaviour
     {
-        private readonly List<(Item item, int amount)> _items = new();
+        private List<(Item item, int amount)> _items = new();
         private string _filter = "all";
         private string _sort = "name";
         private bool _ascending = true;
@@ -179,6 +179,26 @@ namespace Items
             // change scroll steps in scrollbar
             var scrollBar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
             scrollBar.numberOfSteps = Math.Max(1, nbRows - 4);
+        }
+
+        public List<(int, int)> ToSave()
+        {
+            // second int is the amount of items or the seed in case of equipment
+            var save = new List<(int, int)>();
+            foreach (var (item, amount) in _items)
+                save.Add(item is Equipment equipment ?
+                    (equipment.Id, equipment.Seed) : (item.Id, amount));
+            return save;
+        }
+
+        public void LoadSave(List<(int, int)> save)
+        {
+            _items = new List<(Item, int)>();
+            foreach (var (id, seed) in save)
+            {
+                var item = db.GetItem(id, seed);
+                _items.Add(item is Equipment equipment ? (equipment, 1) : (item, seed /* amount */));
+            }
         }
     }
 }
