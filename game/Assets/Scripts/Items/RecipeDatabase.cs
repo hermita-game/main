@@ -1,18 +1,29 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RecipeDatabase : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+// building: "lab 1" or "ws 5" or "wb 69"
 
-    // Update is called once per frame
-    void Update()
+namespace Items
+{
+    public class RecipeDatabase : MonoBehaviour
     {
-        
+        private List<Recipe> _recipes;
+        // Should be attached to a game object in the housing
+        void Awake()
+        {
+            BuildDatabase();
+        }
+
+        private void BuildDatabase()
+        {
+            _recipes = new List<Recipe>
+            {
+                new Recipe(
+                    0, 
+                    "lab 1",
+                    2,
+                    new List<(int itemId, int amount)> { (6, 2), (7, 1) })
+            };
+        }
     }
 }

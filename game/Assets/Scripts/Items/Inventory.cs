@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,12 +9,22 @@ namespace Items
     public class Inventory : MonoBehaviour
     {
         private readonly List<(Item item, int amount)> _items = new();
-        private string filter = "all";
-        private string sort = "name";
-        private bool ascending = true;
+        private string _filter = "all";
+        private string _sort = "name";
+        private bool _ascending = true;
+
+        private const KeyCode Key = KeyCode.I;
+
+        private void Update()
+        {
+            if (!Input.GetKeyDown(Key)) return;
+            if (canvas.activeSelf) {
+                canvas.SetActive(false);
+            } else Show();
+        }
 
         public List<(Item item, int amount)> Items =>
-            filter switch
+            _filter switch
             {
                 "all" => _items,
                 "consumable" => _items.FindAll(i => i.item is Consumable),
@@ -30,6 +41,8 @@ namespace Items
         {
             Loot(5, 2, 1, 2, 0, 4, 1, 1, 0, 0, 3, 3, 3, 3, 1, 1, 2, 3, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 1, 2, 2, 1, 2,
                 1, 0, 0, 0, 0, 1,2,1,2,1,1,0,0,0,1,0,0,1,0,1,2,2,0,5,4,5,4,5,4,4,4,5);
+            Loot(6, 10);
+            Loot(7, 15);
             canvas.SetActive(false);
             var indexing = canvas.transform.Find("Indexing").transform;
             indexing.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
@@ -40,37 +53,36 @@ namespace Items
             sorting.Find("ByName").GetComponent<Button>().onClick.AddListener(() => Sort("name"));
             sorting.Find("ByTier").GetComponent<Button>().onClick.AddListener(() => Sort("tier"));
             sorting.Find("ByAmount").GetComponent<Button>().onClick.AddListener(() => Sort("amount"));
-            Show();
         }
         
         private void Filter(string filt)
         {
-            filter = filt;
+            _filter = filt;
             UpdateDisplay();
         }
-        
+
         private void Sort(string sortKey)
         {
-            if (sortKey == sort)
-                ascending = !ascending;
+            if (sortKey == _sort)
+                _ascending = !_ascending;
             else
-                ascending = true;
-            var order = ascending ? 1 : -1;
-            sort = sortKey;
-            var sorting  = sort switch
+                _ascending = true;
+            var order = _ascending ? 1 : -1;
+            _sort = sortKey;
+            
+            var sorting  = _sort switch
             {
                 "name" => (Comparison<(Item item, int amount)>) ((a, b)
                     => order * string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)),
-                // tier D > C > B > A > S, default : alphabetical order
-                "tier" => ((a, b)
-                    => order * a.item.Tier == b.item.Tier
+                "tier" => (a, b)
+                    => order * (a.item.Tier == b.item.Tier
                         ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
-                        : b.item.Tier == 'S' ? 'A'-1 : b.item.Tier - a.item.Tier == 'S' ? 'A'-1 : a.item.Tier),
-                // default : alphabetical order
-                "amount" => ((a, b)
-                    => order * a.amount == b.amount
+                        : a.item.Tier - b.item.Tier),
+                "amount" => (a, b)
+                    => order * (a.amount == b.amount
                         ? string.Compare(a.item.Name, b.item.Name, StringComparison.InvariantCultureIgnoreCase)
                         : b.amount - a.amount),
+                _ => throw new ArgumentException("Invalid sort key")
             };
             _items.Sort(sorting);
             UpdateDisplay();
@@ -84,14 +96,16 @@ namespace Items
             {
                 for (var i = 0; i < amount; i++)
                     _items.Add((db.GetItem(itemId), 1));
-                return;
+            } else
+            {
+                var index = _items.FindIndex(i => i.item.Id == itemId);
+                if (index == -1)
+                    _items.Add((item, amount));
+                else
+                    _items[index] = (item, _items[index].amount + amount);
             }
-        
-            var index = _items.FindIndex(i => i.item.Id == itemId);
-            if (index == -1)
-                _items.Add((item, amount));
-            else
-                _items[index] = (item, _items[index].amount + amount);
+            if (canvas.activeSelf)
+                UpdateDisplay();
         }
     
         public void Loot(int itemId)
@@ -111,10 +125,30 @@ namespace Items
             foreach (var itemId in list)
                 Loot(itemId, 1);
         }
+        
+        public bool Remove(int itemId, int amount)
+        {
+            var index = _items.FindIndex(i => i.item.Id == itemId);
+            if (index == -1)
+                return false;
+            if (_items[index].amount == amount)
+                _items.RemoveAt(index);
+            else if (_items[index].amount < amount)
+                return false;
+            else _items[index] = (_items[index].item, _items[index].amount - amount);
+            return true;
+        }
+        
+        public bool Remove(int itemId)
+            => Remove(itemId, 1);
+
+        public bool Remove(IEnumerable<(int itemId, int amount)> list)
+            => list.All(i => Remove(i.itemId, i.amount));
 
         public void Show()
         {
             canvas.SetActive(true);
+            Sort(_sort);
             UpdateDisplay();
         }
         
@@ -134,7 +168,7 @@ namespace Items
             {
                 // Instantiate Item Prefab as GameObject and set its parent to the content
                 var instance = Instantiate(Resources.Load("Prefabs/Item"), content) as GameObject;
-                if (instance == null)
+                if (instance is null)
                     throw new Exception("Item prefab not found!");
                 // Set the item's name and amount
                 instance.GetComponent<UIItem>().SetItem(item, amount);

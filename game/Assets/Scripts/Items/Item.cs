@@ -1,10 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Fighting;
 using UnityEngine;
-
-
 
 namespace Items
 {
@@ -14,16 +13,31 @@ namespace Items
         Armor,
         Necklace
     }
-    
+
     public class Item
     {
         public int Id;
         public string Name;
         public string Description;
-        public char Tier;
+        public int Tier;
         public Sprite Icon;
         
+        
         public Item(int id, string name, string description, char tier, Sprite icon)
+        {
+            Id = id;
+            Name = name;
+            Tier = tier switch
+            {
+                'S' => 0,
+                >= 'A' and <= 'D' => tier - 'A' + 1,
+                _ => throw new ArgumentException("Invalid tier")
+            };
+            Description = description;
+            Icon = icon;
+        }
+
+        protected Item(int id, string name, string description, int tier, Sprite icon)
         {
             Id = id;
             Name = name;
@@ -31,6 +45,15 @@ namespace Items
             Description = description;
             Icon = icon;
         }
+        
+        public static string AmountToString(int amount)
+            => amount switch
+                {
+                    < 1000 => amount.ToString(),
+                    < 1000000 => $"{amount / 1000}K",
+                    < 1000000000 => $"{amount / 1000000}M",
+                    _ => $"{amount / 1000000000}B"
+                };
     }
 
     public class Equipment : Item
@@ -46,6 +69,12 @@ namespace Items
         }
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, Stats stats)
+            : base(id, name, description, tier, icon)
+        {
+            BaseStats = stats;
+        }
+        
+        private Equipment(int id, string name, string description, int tier, Sprite icon, Stats stats)
             : base(id, name, description, tier, icon)
         {
             BaseStats = stats;

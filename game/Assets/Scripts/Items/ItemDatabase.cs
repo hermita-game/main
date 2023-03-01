@@ -6,7 +6,7 @@ namespace Items
 {
     public class ItemDatabase : MonoBehaviour
     {
-        public List<Item> items = new();
+        private List<Item> _items = new();
     
         private void Awake()
         {
@@ -14,10 +14,10 @@ namespace Items
             DontDestroyOnLoad(gameObject);
         }
 
-        void BuildDatabase()
+        private void BuildDatabase()
         {
             var set1 = Resources.LoadAll("Items/Shikashi", typeof(Sprite)).Cast<Sprite>().ToArray();
-            items = new List<Item>
+            _items = new List<Item>
             {
                 new Equipment(
                     0,
@@ -38,7 +38,7 @@ namespace Items
                 new Equipment(
                     2,
                     "Forest boss' arm",
-                    "A wand that formerly was the arm of the forest miniboss",
+                    "A wand created with the arms of the forest miniboss",
                     'C',
                     set1[74],
                     StuffType.Wand,
@@ -62,12 +62,24 @@ namespace Items
                     "A pearl that can be used to make water orbs",
                     'B',
                     set1[10]),
+                new Item(
+                    6,
+                    "Mechanical arm",
+                    "An arm that belonged to the forest miniboss",
+                    'C',
+                    set1[93]),
+                new Item(
+                    7,
+                    "Thunder Gem",
+                    "A gem that can be used to make thunder orbs",
+                    'D',
+                    set1[242]),
             };
         }
 
         public Item GetItem(int id)
         {
-            var item = items.First(item => item.Id == id);
+            var item = _items.First(item => item.Id == id);
             if (item is Equipment equipment)
                 return equipment.GetEquipmentInstance(Random.Range(0, 100000));
             return item;
