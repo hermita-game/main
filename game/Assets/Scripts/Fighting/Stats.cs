@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,30 +17,32 @@ namespace Fighting
         hp-regen: health points regeneration
         mp-regen: mana points regeneration
     */
-    public class Stats
+    public class Stats : IEnumerable<(string stat, Stats.Type type, float val)>
     {
         public enum Type
         {
             Percent, // Percent of base stat
             Flat     // Flat value
         }
-        private readonly Dictionary<string, (Type type, float val)> _stats;
+        private readonly ConcurrentDictionary<string, (Type type, float val)> _stats;
     
         public (Type type, float val) this[string stat]
         {
-            get => _stats[stat];
-            set => _stats[stat] = value;
+            get => _stats.ContainsKey(stat) ? _stats[stat] : (Type.Flat, 0);
+            set
+            {
+                if (value.val == 0)
+                     _stats.TryRemove(stat, out _);
+                else _stats[stat] = value;
+            }
         }
     
         public Stats()
-            => _stats = new Dictionary<string, (Type type, float val)>();
-        
-        public Stats(Dictionary<string, (Type type, float val)> stats)
-            => _stats = stats;
-        
+            => _stats = new ConcurrentDictionary<string, (Type type, float val)>();
+
         public Stats(params (string, Type, float)[] stats)
         {
-            _stats = new Dictionary<string, (Type type, float val)>();
+            _stats = new ConcurrentDictionary<string, (Type type, float val)>();
             foreach (var (stat, type, value) in stats)
                 _stats[stat] = (type, value);
         }
@@ -48,7 +52,7 @@ namespace Fighting
         // </summary>
         public Stats(string stats)
         {
-            _stats = new Dictionary<string, (Type type, float val)>();
+            _stats = new ConcurrentDictionary<string, (Type type, float val)>();
             foreach (var stat in stats.Split(", "))
             {
                 var parts = stat.Split(' ');
@@ -64,26 +68,100 @@ namespace Fighting
             }
         }
         
-        public IEnumerable<(string, (Type type, float val))> GetStats()
-            => _stats.Select(stat => (stat.Key, stat.Value));
+        public IEnumerator<(string stat,Type type, float val)> GetEnumerator()
+            => _stats.Select(stat
+                => (stat.Key, stat.Value.type, stat.Value.val)).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
 
-        public static Stats Ceil(Stats stats, Stats ceiling)
+        public FlatStats Flatten(FlatStats reference)
         {
-            var result = new Stats();
-            foreach (var (key, (type, val)) in stats.GetStats())
-                if (type != Type.Flat)
-                    throw new Exception("Ceiling only works with flat stats");
-                else
-                    result[key] = (type, Math.Min(val, ceiling[key].val));
+            var result = new FlatStats(reference);
+            foreach (var (key, type, val) in this)
+            {
+                if (type == Type.Percent)
+                     result[key] += reference[key] * val / 100;
+                else result[key] += val;
+            }
             return result;
         }
-        
+
         public override string ToString()
         {
             var result = "";
-            foreach (var (key, (type, val)) in GetStats())
+            foreach (var (key, type, val) in this)
                 result += $"{key} {(val > 0 ? "+" : "")}{Math.Round(val)}{(type == Type.Percent ? "%" : "")}\n";
             return result;
         }
+    }
+
+    public class FlatStats : IEnumerable<(string key, float val)>
+    {
+        private readonly ConcurrentDictionary<string, float> _stats;
+        
+        public float this[string stat]
+        {
+            get => _stats.ContainsKey(stat) ? _stats[stat] : 0;
+            set => _stats[stat] = value;
+        }
+        
+        public FlatStats()
+            => _stats = new ConcurrentDictionary<string, float>();
+
+        public FlatStats(FlatStats stats)
+            => _stats = new ConcurrentDictionary<string, float>(stats._stats);
+        
+        public FlatStats(Stats stats)
+        {
+            _stats = new ConcurrentDictionary<string, float>();
+            foreach (var (key, type, val) in stats)
+                if (type != Stats.Type.Flat)
+                    throw new Exception("FlatStats only works with flat stats");
+                else _stats[key] = val;
+        }
+
+        public static FlatStats operator +(FlatStats a, FlatStats b)
+        {
+            var result = new FlatStats(a);
+            foreach (var (key, val) in b)
+                result[key] += result[key];
+            return result;
+        }
+        
+        public static FlatStats operator -(FlatStats a, FlatStats b)
+        {
+            var result = new FlatStats(a);
+            foreach (var (key, val) in b)
+                result[key] -= result[key];
+            return result;
+        }
+        
+        public static FlatStats operator *(FlatStats a, float b)
+        {
+            var result = new FlatStats(a);
+            foreach (var (key, val) in result)
+                result[key] *= b;
+            return result;
+        }
+        
+        public static FlatStats operator /(FlatStats a, float b)
+        {
+            var result = new FlatStats(a);
+            foreach (var (key, val) in result)
+                result[key] /= b;
+            return result;
+        }
+        
+        public void Ceil(FlatStats ceiling)
+        {
+            foreach (var (key, val) in this)
+                this[key] = Math.Min(val, ceiling[key]);
+        }
+
+        public IEnumerator<(string key, float val)> GetEnumerator()
+            => _stats.Select(stat => (stat.Key, stat.Value)).GetEnumerator();
+        
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
     }
 }
