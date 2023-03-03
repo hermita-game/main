@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,11 @@ namespace Items
         private string _sort = "name";
         private bool _ascending = true;
         private bool _showing;
+        
+        private Transform _content;
+        private RectTransform _contentRect;
+        private Scrollbar _scrollbar;
+        private TextMeshProUGUI _playerStatsText;
         private GameObject _tooltip;
 
         private const KeyCode Key = KeyCode.I;
@@ -39,15 +45,15 @@ namespace Items
 
         private void Start()
         {
+            _content = canvas.transform.Find("Scroll View").Find("Viewport").Find("Content");
+            _contentRect = _content.GetComponent<RectTransform>();
+            _scrollbar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
+            _playerStatsText = canvas.transform.Find("Player Stats").GetComponent<TextMeshProUGUI>();
             _tooltip = canvas.transform.Find("Tooltip").gameObject;
             _tooltip.SetActive(false);
             canvas.SetActive(false);
             
-            Loot(5, 2, 1, 2, 0, 4, 1, 1, 0, 0, 3, 3, 3, 3, 1, 1, 2, 3, 1, 2, 1, 2, 1, 1, 0, 0, 0, 0, 1, 2, 2, 1, 2,
-                1, 0, 0, 0, 0, 1,2,1,2,1,1,0,0,0,1,0,0,1,0,1,2,2,0,5,4,5,4,5,4,4,4,5);
-            Loot((4, 5), (5, 6));
-            Loot(6, 10);
-            Loot(7, 15);
+            Loot(0,1,2,3,4,5,6,7,8,9,10,11,12,100,101,102,103,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224);
             var indexing = canvas.transform.Find("Indexing").transform;
             indexing.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
             indexing.Find("Consumable").GetComponent<Button>().onClick.AddListener(() => Filter("consumable"));
@@ -150,6 +156,10 @@ namespace Items
         public void Show()
         {
             canvas.SetActive(true);
+            var player = GetComponent<Fighting.Player>();
+            if (player is null)
+                throw new Exception("Player not found!");
+            _playerStatsText.text = GetComponent<Fighting.Player>().GetStatsString();
             Sort(_sort);
             _showing = true;
         }
@@ -164,16 +174,15 @@ namespace Items
         {
             _tooltip.SetActive(true);
             var nbRows = (Items.Count - 1) / 6 + 1;
-            var content = canvas.transform.Find("Scroll View").Find("Viewport").Find("Content");
             // Set the content's height to the number of rows
-            content.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 58*nbRows-3);
-            foreach (Transform child in content)
+            _contentRect.sizeDelta = new Vector2(0, 58*nbRows-3);
+            foreach (Transform child in _content)
                 Destroy(child.gameObject);
 
             foreach (var (item, amount) in Items)
             {
                 // Instantiate Item Prefab as GameObject and set its parent to the content
-                var instance = Instantiate(Resources.Load("Prefabs/Item"), content) as GameObject;
+                var instance = Instantiate(Resources.Load("Prefabs/Item"), _content) as GameObject;
                 if (instance is null)
                     throw new Exception("Item prefab not found!");
                 // Set the item's name and amount
@@ -181,8 +190,7 @@ namespace Items
             }
 
             // change scroll steps in scrollbar
-            var scrollBar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
-            scrollBar.numberOfSteps = Math.Max(1, nbRows - 4);
+            _scrollbar.numberOfSteps = Math.Max(1, nbRows - 4);
             _tooltip.SetActive(false);
         }
 

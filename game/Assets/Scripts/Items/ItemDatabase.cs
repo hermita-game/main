@@ -146,9 +146,10 @@ namespace Items
                     "A simple health regeneration potion",
                     'C',
                     potion_set[1],
-                    "hp +50"),
+                    "hp-regen +5",
+                    10),
                 new Consumable( 
-                    102, 
+                    102,
                     "Mana potion",
                     "A simple mana potion",
                     'C',
@@ -160,7 +161,8 @@ namespace Items
                     "A simple mana regeneration potion",
                     'C',
                     potion_set[3],
-                    "mp +40"),
+                    "mp-regen +4",
+                    10),
                 new Item( // elemental dusts
                     200,
                     "Fire dust",

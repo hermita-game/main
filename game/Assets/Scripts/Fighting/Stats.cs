@@ -86,11 +86,19 @@ namespace Fighting
             return result;
         }
 
+        private static string Round(float val)
+            => $"{(val > 0 ? "+" : "")}{Math.Round(val * 10) / 10}";
         public override string ToString()
         {
             var result = "";
             foreach (var (key, type, val) in this)
-                result += $"{key} {(val > 0 ? "+" : "")}{Math.Round(val)}{(type == Type.Percent ? "%" : "")}\n";
+            {
+                if (key.EndsWith("-regen"))
+                    result += $"{key[..^6]} {Round(val)}{(type == Type.Percent ? "%" : "")}/s";
+                else
+                    result += $"{key} {Round(val)}{(type == Type.Percent ? "%" : "")}";
+                result += "\n";
+            }
             return result;
         }
     }

@@ -9,21 +9,21 @@ namespace Fighting
 {
     public class Player : MonoBehaviour
     {
-        public readonly FlatStats BaseStats; // Basic stats of the player
+        public FlatStats BaseStats; // Basic stats of the player
         public FlatStats EquipmentStats; // Stats from equipment
-        public FlatStats PlayerStats; // Stats with modifiers and used for calculations
         public FlatStats MaxPlayerStats; // Max stats of the player
-        public FlatStats RegenStats; // Stats that are added to the player every second
+        public FlatStats PlayerStats; // Stats with modifiers and used for calculations
         public List<(int duration, FlatStats effect)> Effects; // Effects that are applied to the player
 
         public (Equipment necklace, Equipment robe, Equipment wand) Equipment;
 
-        public Player(FlatStats baseStats)
+        private void Awake()
         {
+            var baseStats = new FlatStats(new Stats("hp +100, mp +100, atk +10, res +10, hp-regen +1, mp-regen +1"));
             BaseStats = new FlatStats(baseStats);
-            PlayerStats = new FlatStats(baseStats);
             EquipmentStats = new FlatStats();
             MaxPlayerStats = new FlatStats(baseStats);
+            PlayerStats = new FlatStats(baseStats);
         }
 
         private void UpdateEquipmentStats()
@@ -40,32 +40,29 @@ namespace Fighting
             PlayerStats += EquipmentStats; // Add new equipment stats
             MaxPlayerStats = BaseStats + EquipmentStats;
         }
-        
-        private void UpdateRegenStats()
-        {
-            RegenStats = new FlatStats();
-            var regens = PlayerStats.Where(stat => stat.key.EndsWith("-regen"));
-            foreach (var (stat, val) in regens)
-                RegenStats[stat.Substring(0, stat.Length - 7)] = val;
-        }
-        
+
         private void InitRegenLoop()
         {
             // Stats are stored in ConcurrentDictionary, so we can access them from multiple threads
             var timer = new Timer(_ =>
             {
+                // potion effects
                 for (var i = 0; i < Effects.Count; i++)
                 {
                     var (duration, effect) = Effects[i];
-                    if (duration == 0)
+                    if (Effects[i].duration == 0)
                     {
-                        RegenStats -= effect;
+                        MaxPlayerStats -= effect;
+                        PlayerStats -= effect;
                         Effects.RemoveAt(i);
                         i--;
                     }
                     else Effects[i] = (duration - 1, effect);
                 }
-                PlayerStats += RegenStats;
+
+                // Apply *-regen stats
+                foreach (var (key, val) in PlayerStats.Where(x => x.key.EndsWith("-regen")))
+                    PlayerStats[key[..^6]] += val;
                 PlayerStats.Ceil(MaxPlayerStats);
             }, null, 0, 1000);
         }
@@ -73,7 +70,8 @@ namespace Fighting
         private void AddEffect(FlatStats effect, int duration)
         {
             Effects.Add((duration, effect));
-            RegenStats += effect;
+            MaxPlayerStats += effect;
+            PlayerStats += effect;
         }
         
         public void UseConsumable(Consumable consumable)
@@ -122,12 +120,12 @@ namespace Fighting
             foreach (var (stat, val) in PlayerStats)
             {
                 if (stat.EndsWith("-regen")) continue;
-                str +=
-                    $"{stat}: {Round(val)} / {Round(MaxPlayerStats[stat])} ({Round(BaseStats[stat])} {ParseDiffNumber(EquipmentStats[stat])})";
-                if (RegenStats[stat] != 0) str += $" - ({ParseDiffNumber(RegenStats[stat])}/s)";
+                str += $"{stat}: {Round(val)}/{Round(MaxPlayerStats[stat])}";
+                var regen = PlayerStats[stat + "-regen"];
+                if (regen != 0)
+                    str += $" {ParseDiffNumber(regen)}/s";
                 str += "\n";
             }
-
             return str;
         }
     }
