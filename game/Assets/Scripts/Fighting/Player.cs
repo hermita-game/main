@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Items;
+using UnityEngine;
 
 namespace Fighting
 {
-    public class Player
+    public class Player : MonoBehaviour
     {
         public readonly FlatStats BaseStats; // Basic stats of the player
         public FlatStats EquipmentStats; // Stats from equipment
@@ -103,6 +104,31 @@ namespace Fighting
             }
             UpdateEquipmentStats();
             return oldEquipment;
+        }
+        
+        private float Round(float val)
+            => (float) Math.Round(val * 10) / 10;
+        private string ParseDiffNumber(float val)
+            => val switch
+            {
+                > 0 => $"<color=green>+{Round(val)}</color>",
+                < 0 => $"<color=red>{Round(val)}</color>",
+                _ => ""
+            };
+
+        public string GetStatsString()
+        {
+            var str = "";
+            foreach (var (stat, val) in PlayerStats)
+            {
+                if (stat.EndsWith("-regen")) continue;
+                str +=
+                    $"{stat}: {Round(val)} / {Round(MaxPlayerStats[stat])} ({Round(BaseStats[stat])} {ParseDiffNumber(EquipmentStats[stat])})";
+                if (RegenStats[stat] != 0) str += $" - ({ParseDiffNumber(RegenStats[stat])}/s)";
+                str += "\n";
+            }
+
+            return str;
         }
     }
 }
