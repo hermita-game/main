@@ -24,6 +24,10 @@ namespace Fighting
             EquipmentStats = new FlatStats();
             MaxPlayerStats = new FlatStats(baseStats);
             PlayerStats = new FlatStats(baseStats);
+            Effects = new List<(int duration, FlatStats effect)>();
+            InitRegenLoop();
+            PlayerStats["hp"] = 10;
+            PlayerStats["mp"] = 10;
         }
 
         private void UpdateEquipmentStats()
@@ -46,7 +50,15 @@ namespace Fighting
             // Stats are stored in ConcurrentDictionary, so we can access them from multiple threads
             var timer = new Timer(_ =>
             {
-                // potion effects
+                // Apply *-regen stats
+                foreach (var (key, val) in PlayerStats)
+                {
+                    if (!key.EndsWith("-regen")) continue;
+                    PlayerStats[key[..^6]] += val;
+                }
+                PlayerStats.Ceil(MaxPlayerStats);
+                
+                // potion countdown
                 for (var i = 0; i < Effects.Count; i++)
                 {
                     var (duration, effect) = Effects[i];
@@ -59,11 +71,6 @@ namespace Fighting
                     }
                     else Effects[i] = (duration - 1, effect);
                 }
-
-                // Apply *-regen stats
-                foreach (var (key, val) in PlayerStats.Where(x => x.key.EndsWith("-regen")))
-                    PlayerStats[key[..^6]] += val;
-                PlayerStats.Ceil(MaxPlayerStats);
             }, null, 0, 1000);
         }
         
@@ -77,7 +84,10 @@ namespace Fighting
         public void UseConsumable(Consumable consumable)
         {
             var flatStats = consumable.Stats.Flatten(PlayerStats);
-            AddEffect(flatStats, consumable.Duration);
+            if (consumable.Duration == 0)
+                PlayerStats += flatStats;
+            else
+                AddEffect(flatStats, consumable.Duration);
         }
         
         public Equipment Equip(Equipment equipment)
@@ -106,11 +116,14 @@ namespace Fighting
         
         private float Round(float val)
             => (float) Math.Round(val * 10) / 10;
+        
+        const string green = "#3c782b";
+        const string red = "#781f0d";
         private string ParseDiffNumber(float val)
             => val switch
             {
-                > 0 => $"<color=green>+{Round(val)}</color>",
-                < 0 => $"<color=red>{Round(val)}</color>",
+                > 0 => $"<color={green}>+{Round(val)}</color>",
+                < 0 => $"<color={red}>{Round(val)}</color>",
                 _ => ""
             };
 

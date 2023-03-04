@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,10 +15,13 @@ namespace Items
         private string _sort = "name";
         private bool _ascending = true;
         private bool _showing;
+        private Timer _refreshTimer;
+        private int _lastItemCount;
         
         private Transform _content;
         private RectTransform _contentRect;
         private Scrollbar _scrollbar;
+        private Fighting.Player _player;
         private TextMeshProUGUI _playerStatsText;
         private GameObject _tooltip;
 
@@ -30,7 +34,7 @@ namespace Items
             else Show();
         }
 
-        public List<(Item item, int amount)> Items =>
+        private List<(Item item, int amount)> Items =>
             _filter switch
             {
                 "all" => _items,
@@ -48,11 +52,12 @@ namespace Items
             _content = canvas.transform.Find("Scroll View").Find("Viewport").Find("Content");
             _contentRect = _content.GetComponent<RectTransform>();
             _scrollbar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
-            _playerStatsText = canvas.transform.Find("Player Stats").GetComponent<TextMeshProUGUI>();
+            _player = GetComponent<Fighting.Player>();
+            _playerStatsText = canvas.transform.Find("Stats Panel").Find("Player Stats").GetComponent<TextMeshProUGUI>();
             _tooltip = canvas.transform.Find("Tooltip").gameObject;
             _tooltip.SetActive(false);
             canvas.SetActive(false);
-            
+
             Loot(0,1,2,3,4,5,6,7,8,9,10,11,12,100,101,102,103,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224);
             var indexing = canvas.transform.Find("Indexing").transform;
             indexing.Find("All").GetComponent<Button>().onClick.AddListener(() => Filter("all"));
@@ -153,21 +158,27 @@ namespace Items
         public bool Remove(IEnumerable<(int itemId, int amount)> list)
             => list.All(i => Remove(i.itemId, i.amount));
 
-        public void Show()
+        private void Show()
         {
             canvas.SetActive(true);
-            var player = GetComponent<Fighting.Player>();
-            if (player is null)
-                throw new Exception("Player not found!");
-            _playerStatsText.text = GetComponent<Fighting.Player>().GetStatsString();
+            UpdatePlayerStats();
             Sort(_sort);
             _showing = true;
+            _refreshTimer = new Timer(_ =>
+            {
+                Debug.Log(_player.GetStatsString());
+                _playerStatsText.text = _player.GetStatsString();
+                // force update
+                _playerStatsText.enabled = false;
+                _playerStatsText.enabled = true;
+            }, null, 0, 1000);
         }
-        
-        public void Hide()
+
+        private void Hide()
         {
             canvas.SetActive(false);
             _showing = false;
+            _refreshTimer.Dispose();
         }
             
         private void UpdateDisplay()
@@ -192,6 +203,14 @@ namespace Items
             // change scroll steps in scrollbar
             _scrollbar.numberOfSteps = Math.Max(1, nbRows - 4);
             _tooltip.SetActive(false);
+        }
+        
+        private void UpdatePlayerStats()
+        {
+            _playerStatsText.gameObject.SetActive(false);
+            _playerStatsText.text = _player.GetStatsString();
+            // update displayed stats
+            _playerStatsText.gameObject.SetActive(true);
         }
 
         public List<(int, int)> ToSave()

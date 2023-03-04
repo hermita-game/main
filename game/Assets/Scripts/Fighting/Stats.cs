@@ -76,7 +76,7 @@ namespace Fighting
 
         public FlatStats Flatten(FlatStats reference)
         {
-            var result = new FlatStats(reference);
+            var result = new FlatStats();
             foreach (var (key, type, val) in this)
             {
                 if (type == Type.Percent)
@@ -132,7 +132,7 @@ namespace Fighting
         {
             var result = new FlatStats(a);
             foreach (var (key, val) in b)
-                result[key] += result[key];
+                result[key] += val;
             return result;
         }
         
@@ -140,7 +140,7 @@ namespace Fighting
         {
             var result = new FlatStats(a);
             foreach (var (key, val) in b)
-                result[key] -= result[key];
+                result[key] -= val;
             return result;
         }
         
