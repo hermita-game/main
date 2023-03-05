@@ -43,10 +43,19 @@ namespace Fighting
             }
             PlayerStats += EquipmentStats; // Add new equipment stats
             MaxPlayerStats = BaseStats + EquipmentStats;
+            StatsChanged();
         }
+        
+        public delegate void StatsUpdateHandler();
+        public event StatsUpdateHandler OnStatsUpdate;
+        
+        private void StatsChanged()
+            => OnStatsUpdate?.Invoke();
+        
 
         private void InitRegenLoop()
         {
+            var changed = false;
             // Stats are stored in ConcurrentDictionary, so we can access them from multiple threads
             var timer = new Timer(_ =>
             {
@@ -54,9 +63,15 @@ namespace Fighting
                 foreach (var (key, val) in PlayerStats)
                 {
                     if (!key.EndsWith("-regen")) continue;
-                    PlayerStats[key[..^6]] += val;
+                    var stat = key[..^6];
+                    var before = PlayerStats[stat];
+                    PlayerStats[stat] = before + val;
+                    if (PlayerStats[stat] > MaxPlayerStats[stat])
+                        PlayerStats[stat] = MaxPlayerStats[stat];
+                    if (Math.Abs(PlayerStats[stat] - before) > 0.05)
+                        changed = true;
                 }
-                PlayerStats.Ceil(MaxPlayerStats);
+                if (changed) StatsChanged();
                 
                 // potion countdown
                 for (var i = 0; i < Effects.Count; i++)
@@ -79,13 +94,18 @@ namespace Fighting
             Effects.Add((duration, effect));
             MaxPlayerStats += effect;
             PlayerStats += effect;
+            StatsChanged();
         }
         
         public void UseConsumable(Consumable consumable)
         {
             var flatStats = consumable.Stats.Flatten(PlayerStats);
             if (consumable.Duration == 0)
+            {
                 PlayerStats += flatStats;
+                PlayerStats.Ceil(MaxPlayerStats);
+                StatsChanged();
+            }
             else
                 AddEffect(flatStats, consumable.Duration);
         }
@@ -140,6 +160,12 @@ namespace Fighting
                 str += "\n";
             }
             return str;
+        }
+        
+        public void SetStat(string stat, float val)
+        {
+            PlayerStats[stat] = val;
+            StatsChanged();
         }
     }
 }

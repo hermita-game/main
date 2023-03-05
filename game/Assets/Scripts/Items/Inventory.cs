@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Fighting;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,8 +16,6 @@ namespace Items
         private string _sort = "name";
         private bool _ascending = true;
         private bool _showing;
-        private Timer _refreshTimer;
-        private int _lastItemCount;
         
         private Transform _content;
         private RectTransform _contentRect;
@@ -164,21 +163,14 @@ namespace Items
             UpdatePlayerStats();
             Sort(_sort);
             _showing = true;
-            _refreshTimer = new Timer(_ =>
-            {
-                Debug.Log(_player.GetStatsString());
-                _playerStatsText.text = _player.GetStatsString();
-                // force update
-                _playerStatsText.enabled = false;
-                _playerStatsText.enabled = true;
-            }, null, 0, 1000);
+            _player.OnStatsUpdate += UpdatePlayerStats;
         }
 
         private void Hide()
         {
             canvas.SetActive(false);
             _showing = false;
-            _refreshTimer.Dispose();
+            _player.OnStatsUpdate -= UpdatePlayerStats;
         }
             
         private void UpdateDisplay()
@@ -207,10 +199,7 @@ namespace Items
         
         private void UpdatePlayerStats()
         {
-            _playerStatsText.gameObject.SetActive(false);
             _playerStatsText.text = _player.GetStatsString();
-            // update displayed stats
-            _playerStatsText.gameObject.SetActive(true);
         }
 
         public List<(int, int)> ToSave()

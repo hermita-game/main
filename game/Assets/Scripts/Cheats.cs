@@ -28,6 +28,6 @@ public class Cheats : CommandBehaviour
     private static void set_stat(string stat, float value)
     {
         var player = PlayerMovement.GetPlayer();
-        player.GetComponent<Fighting.Player>().PlayerStats[stat] = value;
+        player.GetComponent<Fighting.Player>().SetStat(stat, value);
     }
 }
