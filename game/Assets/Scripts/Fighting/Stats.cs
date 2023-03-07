@@ -110,7 +110,12 @@ namespace Fighting
         public float this[string stat]
         {
             get => _stats.ContainsKey(stat) ? _stats[stat] : 0;
-            set => _stats[stat] = value;
+            set
+            {
+                if (value == 0)
+                    _stats.TryRemove(stat, out _);
+                else _stats[stat] = value;
+            }
         }
         
         public FlatStats()

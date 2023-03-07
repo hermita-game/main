@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using Items;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Fighting
 {
@@ -19,7 +20,7 @@ namespace Fighting
 
         private void Awake()
         {
-            var baseStats = new FlatStats(new Stats("hp +100, mp +100, atk +10, res +10, hp-regen +1, mp-regen +1"));
+            var baseStats = new FlatStats(new Stats("hp +100, mp +100, atk +10, spd +10, res +10, hp-regen +1, mp-regen +1"));
             BaseStats = new FlatStats(baseStats);
             EquipmentStats = new FlatStats();
             MaxPlayerStats = new FlatStats(baseStats);
@@ -30,27 +31,30 @@ namespace Fighting
             PlayerStats["mp"] = 10;
         }
 
-        private void UpdateEquipmentStats()
+        private void UpdateEquipment()
         {
             PlayerStats -= EquipmentStats; // Remove old equipment stats
             EquipmentStats = new FlatStats();
             foreach (var eq in new[] {Equipment.necklace, Equipment.robe, Equipment.wand})
             {
                 if (eq is null) continue;
-                var flatStats = eq.BaseStats.Flatten(BaseStats);
-                foreach (var (stat, val) in flatStats)
-                    EquipmentStats[stat] += val;
+                EquipmentStats += eq.BaseStats.Flatten(BaseStats);
             }
             PlayerStats += EquipmentStats; // Add new equipment stats
             MaxPlayerStats = BaseStats + EquipmentStats;
             StatsChanged();
+            EquipmentChanged();
         }
         
         public delegate void StatsUpdateHandler();
         public event StatsUpdateHandler OnStatsUpdate;
-        
         private void StatsChanged()
             => OnStatsUpdate?.Invoke();
+        
+        public delegate void EquipmentUpdateHandler();
+        public event EquipmentUpdateHandler OnEquipmentUpdate;
+        private void EquipmentChanged()
+            => OnEquipmentUpdate?.Invoke();
         
 
         private void InitRegenLoop()
@@ -117,20 +121,23 @@ namespace Fighting
             {
                 case StuffType.Necklace:
                     oldEquipment = Equipment.necklace;
-                    Equipment.necklace = equipment;
+                    Equipment.necklace = ReferenceEquals(oldEquipment, equipment)
+                        ? null : equipment;
                     break;
                 case StuffType.Robe:
                     oldEquipment = Equipment.robe;
-                    Equipment.robe = equipment;
+                    Equipment.robe = ReferenceEquals(oldEquipment, equipment)
+                        ? null : equipment;
                     break;
                 case StuffType.Wand:
                     oldEquipment = Equipment.wand;
-                    Equipment.wand = equipment;
+                    Equipment.wand = ReferenceEquals(oldEquipment, equipment)
+                        ? null : equipment;
                     break;
                 default:
                     throw new Exception("Unknown equipment type");
             }
-            UpdateEquipmentStats();
+            UpdateEquipment();
             return oldEquipment;
         }
         
