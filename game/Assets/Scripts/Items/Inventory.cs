@@ -11,6 +11,11 @@ namespace Items
 {
     public class Inventory : MonoBehaviour
     {
+        public ItemDatabase db;
+        public GameObject canvas;
+        public KeyCode key = KeyCode.I;
+
+        
         private List<(Item item, int amount)> _items = new();
         private string _filter = "all";
         private string _sort = "name";
@@ -27,12 +32,9 @@ namespace Items
         private GameObject _itemPrefab;
         private (Transform neck, Transform chest, Transform wand) _stuff;
         
-
-        private const KeyCode Key = KeyCode.I;
-
         private void Update()
         {
-            if (!Input.GetKeyDown(Key)) return;
+            if (!Input.GetKeyDown(key)) return;
             if (_showing) Hide();
             else Show();
         }
@@ -47,15 +49,12 @@ namespace Items
                 _ => throw new ArgumentException("Invalid filter")
             };
 
-        public ItemDatabase db;
-        public GameObject canvas;
-
         private void Start()
         {
             _content = canvas.transform.Find("Scroll View").Find("Viewport").Find("Content");
             _contentRect = _content.GetComponent<RectTransform>();
             _scrollbar = canvas.transform.Find("Scroll View").Find("Scrollbar Vertical").GetComponent<Scrollbar>();
-            _player = GetComponent<Fighting.Player>();
+            _player = Tools.GetPlayer();
             _playerStatsText = canvas.transform.Find("Stats Panel").Find("Player Stats").GetComponent<TextMeshProUGUI>();
             _tooltip = canvas.transform.Find("Tooltip").gameObject;
             _tooltipScript = _tooltip.GetComponent<Tooltip>();

@@ -44,17 +44,13 @@ namespace Items
             // if the item is a weapon
             if (_item is Equipment eq)
             {
-                var player = GameObject.FindGameObjectWithTag("Player");
-                var inventory = player.GetComponent<Inventory>();
-                inventory.Remove(eq);
-                var old = player.GetComponent<Fighting.Player>().Equip(eq);
-                if (old != null) inventory.Loot(old);
+                Tools.GetInventory().Remove(eq);
+                var old = Tools.GetPlayer().GetComponent<Fighting.Player>().Equip(eq);
+                if (old != null) Tools.GetInventory().Loot(old);
             } else if (_item is Consumable potion)
             {
-                var player = GameObject.FindGameObjectWithTag("Player");
-                var inventory = player.GetComponent<Inventory>();
-                inventory.Remove(potion.Id);
-                player.GetComponent<Fighting.Player>().UseConsumable(potion);
+                Tools.GetInventory().Remove(potion.Id);
+                Tools.GetPlayer().UseConsumable(potion);
             }
         }
     }

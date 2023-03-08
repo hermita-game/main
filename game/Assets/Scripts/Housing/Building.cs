@@ -16,14 +16,7 @@ namespace Housing
 
         private void OnMouseDown()
         {
-            var position = transform.position;
-            var task = PlayerMovement.GetPlayer().GetComponent<PlayerMovement>().MoveTo(position.x, position.y);
-            task.ContinueWith(t =>
-            {
-                if (t.Result)
-                    canvas.enabled = true;
-                else Debug.Log($"No path to building {name}");
-            });
+            canvas.enabled = true;
         }
     }
 }

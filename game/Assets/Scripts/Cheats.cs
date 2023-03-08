@@ -12,22 +12,18 @@ public class Cheats : CommandBehaviour
     
     [Command]
     private static void give_item(int itemId, int amount)
-        => PlayerMovement.GetInventory().Loot(itemId, amount);
+        => Tools.GetInventory().Loot(itemId, amount);
 
     [Command]
     private static void use_consumable(int itemId)
     {
-        var player = PlayerMovement.GetPlayer();
-        var inventory = player.GetComponent<Inventory>();
+        var inventory = Tools.GetInventory();
         var item = inventory.db.GetItem(itemId);
         if (item is Consumable potion)
-            player.GetComponent<Fighting.Player>().UseConsumable(potion);
+            Tools.GetPlayer().UseConsumable(potion);
     }
     
     [Command]
     private static void set_stat(string stat, float value)
-    {
-        var player = PlayerMovement.GetPlayer();
-        player.GetComponent<Fighting.Player>().SetStat(stat, value);
-    }
+        => Tools.GetPlayer().SetStat(stat, value);
 }
