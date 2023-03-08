@@ -90,7 +90,7 @@ public class Move : MonoBehaviour
 
         if (anim.GetBool("isMoving"))
         {
-            rb.velocity = (new Vector2(actualX, actualY).normalized) * speed;
+            rb.velocity = (new Vector2(actualX, actualY/2) * speed).normalized;
         }
 
         if (Input.GetKey(up) && !Input.GetKey(down))
