@@ -94,6 +94,7 @@ public class NetworkManagerUI : MonoBehaviour
         if (isHost) NetworkManager.Singleton.StartHost();
         else        NetworkManager.Singleton.StartClient();
         Debug.Log($"Server started, join with code: {code}");
+        GameObject.Find("Code Text").GetComponent<TextMeshProUGUI>().text = code;
         yield return null;
     }
 

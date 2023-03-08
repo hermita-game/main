@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -20,6 +21,12 @@ namespace Multiplayer
         private static readonly int MovementY = Animator.StringToHash("MovementY");
         private static readonly int IsMoving = Animator.StringToHash("isMoving");
         private static readonly int MovementX = Animator.StringToHash("MovementX");
+
+        private void Start()
+        {
+            if (!IsOwner)
+                transform.GetChild(0).gameObject.SetActive(false);
+        }
 
         // Update is called once per frame
         void Update()
