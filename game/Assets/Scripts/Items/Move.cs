@@ -12,142 +12,130 @@ public class Move : MonoBehaviour
     public KeyCode left = KeyCode.LeftArrow;
     public KeyCode right = KeyCode.RightArrow;
 
-    private float actualX;
-    private float actualY = 1;
-    private bool diag;
-    private int nbInput;
+    private float _actualX;
+    private float _actualY = 1;
+    private bool _diag;
+    private int _nbInput;
     
 
-    private bool canDash = true;
-    private bool isDashing = false;
-    private float dashForce = 4f;
-    private float dashTime = 0.1f;
-    private float dashCoolDown = 0.3f;
+    private bool _canDash = true;
+    private bool _isDashing;
+    private float _dashForce = 4f;
+    private const float DashTime = 0.1f;
+    private const float DashCoolDown = 0.3f;
 
 
-    Vector2 movement;
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private Vector2 _movement;
+    private static readonly int MovementY = Animator.StringToHash("MovementY");
+    private static readonly int IsMoving = Animator.StringToHash("isMoving");
+    private static readonly int MovementX = Animator.StringToHash("MovementX");
 
     // Update is called once per frame
     void Update()
     {
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
-        //rb.velocity = new Vector2 (actualX * speed, actualY * speed) * Time.fixedDeltaTime;
+        _movement.x = Input.GetAxisRaw("Horizontal");
+        _movement.y = Input.GetAxisRaw("Vertical");
         
     }
 
     public void FixedUpdate()
     {
-        if (isDashing)
+        if (_isDashing)
             return;
 
-        if (canDash && Input.GetKey(KeyCode.LeftShift))
+        if (_canDash && Input.GetKey(KeyCode.LeftShift))
             StartCoroutine(Dash());
 
         else
         {
-            //rb.MovePosition(rb.position + movement * speed * Time.fixedDeltaTime);
             Animate2();
         }
     }
 
     IEnumerator Dash()
     {
-        Debug.Log("Dash");
-        canDash = false;
-        isDashing = true;
-        rb.velocity = rb.velocity * dashForce;
-        /*if (anim.GetBool("isMoving"))
-            rb.velocity = rb.velocity * dashForce * Time.fixedDeltaTime;*/
-        //else
-            //rb.velocity = new Vector2 (actualX,actualY) * dashForce * 4.5f;
-        //rb(transform.position * dashForce * Time.fixedDeltaTime);
-        yield return new WaitForSeconds(dashTime);
-        rb.velocity = Vector2.zero;
-        isDashing = false;
-        yield return new WaitForSeconds(dashCoolDown);
-        canDash = true;
+        _canDash = false;
+        _isDashing = true;
+        yield return new WaitForSeconds(DashTime);
+        var velocity = Vector2.zero;
+        rb.velocity = velocity;
+        _isDashing = false;
+        yield return new WaitForSeconds(DashCoolDown);
+        _canDash = true;
     }
 
-    public void Animate2()
+    private void Animate2()
     {
-        actualX = anim.GetFloat("MovementX");
-        actualY = anim.GetFloat("MovementY");
+        _actualX = anim.GetFloat(MovementX);
+        _actualY = anim.GetFloat(MovementY);
 
         if (!Input.GetKey(up) && !Input.GetKey(down) && !Input.GetKey(left) && !Input.GetKey(right))
         {
-            anim.SetBool("isMoving", false);
+            anim.SetBool(IsMoving, false);
             rb.velocity = Vector2.zero;
             return;
         }
 
-        if (anim.GetBool("isMoving"))
+        if (anim.GetBool(IsMoving))
         {
-            rb.velocity = (new Vector2(actualX, actualY/2) * speed).normalized;
+            rb.velocity = (new Vector2(_actualX, _actualY/2) * speed).normalized;
         }
 
         if (Input.GetKey(up) && !Input.GetKey(down))
         {
-            anim.SetFloat("MovementY", 1);
-            anim.SetBool("isMoving", true);
+            anim.SetFloat(MovementY, 1);
+            anim.SetBool(IsMoving, true);
         }
         if (Input.GetKey(down) && !Input.GetKey(up))
         {
-            anim.SetFloat("MovementY", -1);
-            anim.SetBool("isMoving", true);
+            anim.SetFloat(MovementY, -1);
+            anim.SetBool(IsMoving, true);
         }
         if (Input.GetKey(left) && !Input.GetKey(right))
         {
-            anim.SetFloat("MovementX", -1);
-            anim.SetBool("isMoving", true);
+            anim.SetFloat(MovementX, -1);
+            anim.SetBool(IsMoving, true);
         }
         if (Input.GetKey(right) && !Input.GetKey(left))
         {
-            anim.SetFloat("MovementX", 1);
-            anim.SetBool("isMoving", true);
+            anim.SetFloat(MovementX, 1);
+            anim.SetBool(IsMoving, true);
         }             
         
 
         if (!Input.GetKey(up) && !Input.GetKey(down))
         {
-            if (diag)
+            if (_diag)
             {
-                StartCoroutine(stayDiag());
+                StartCoroutine(StayDiag());
             }               
             else
             {
-                anim.SetFloat("MovementY", 0);
+                anim.SetFloat(MovementY, 0);
             }                
         }
             
 
         if (!Input.GetKey(left) && !Input.GetKey(right))
         {
-            if (diag)
-                StartCoroutine(stayDiag());
+            if (_diag)
+                StartCoroutine(StayDiag());
             else
             {
-                anim.SetFloat("MovementX", 0);
+                anim.SetFloat(MovementX, 0);
             }                
         }
 
-        if (actualX != 0 && actualY != 0)
+        if (_actualX != 0 && _actualY != 0)
         {
-            diag = true;
+            _diag = true;
         }
     }
     public void Animate()
     {
-        if (movement.x == 0 && movement.y == 0)
+        if (_movement.x == 0 && _movement.y == 0)
         {
-            anim.SetBool("isMoving", false);
+            anim.SetBool(IsMoving, false);
         }
 
         else
@@ -155,58 +143,44 @@ public class Move : MonoBehaviour
 
             if (Input.GetKey(up) || Input.GetKey(down))
             {
-                Debug.Log("viteuf");
                 if (Input.GetKey(left) || Input.GetKey(right))
                 {
                     Debug.Log("diag");
-                    anim.SetBool("isMoving", true);
-                    diag = true;
-                    actualX = movement.x;
-                    actualY = movement.y;
+                    anim.SetBool(IsMoving, true);
+                    _diag = true;
+                    _actualX = _movement.x;
+                    _actualY = _movement.y;
                 }
-                
-                /*if (movement.x != 0 && movement.y != 0)
-                {
-
-                    diag = true;
-                    actualX = movement.x;
-                    actualY = movement.y;
-
-                }*/
             }
 
             else
             {
-                Debug.Log("uni");
                 if (Input.GetKeyDown(up) || Input.GetKeyDown(down) || Input.GetKeyDown(left) || Input.GetKeyDown(right))
                 {
-                    anim.SetBool("isMoving", true);
-                    if (diag)
-                        StartCoroutine(stayDiag());
+                    anim.SetBool(IsMoving, true);
+                    if (_diag)
+                        StartCoroutine(StayDiag());
                     else
                     {
-                        actualX = movement.x;
-                        actualY = movement.y;
+                        _actualX = _movement.x;
+                        _actualY = _movement.y;
                     }
                 }
             }
 
-            anim.SetFloat("MovementX", actualX);
-            anim.SetFloat("MovementY", actualY);
+            anim.SetFloat(MovementX, _actualX);
+            anim.SetFloat(MovementY, _actualY);
 
         }
     }
 
-    IEnumerator stayDiag()
+    private IEnumerator StayDiag()
     {
-        if(diag)
+        if(_diag)
         {
             yield return new WaitForSeconds(0.05f);
-            diag = false;
+            _diag = false;
         }
-
-        else
-            yield break;        
     }
 
 }
