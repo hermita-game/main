@@ -1,6 +1,0 @@
-[submodule "docs"]
-	path = docs
-	url = https://github.com/hermita-game/docs.git
-[submodule "www"]
-	path = www
-	url = https://github.com/hermita-game/hermita-game.github.io.git

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Housing
 {
-    public class Building : MonoBehaviour 
+    public class Building : MonoBehaviour
     {
         public Canvas canvas;
         

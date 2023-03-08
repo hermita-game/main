@@ -1,4 +1,5 @@
 # Unity project: /game/
+*.vsconfig
 *.csproj
 *.sln
 /game/.idea
