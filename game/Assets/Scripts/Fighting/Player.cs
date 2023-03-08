@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Items;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Fighting
 {
