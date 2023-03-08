@@ -147,7 +147,7 @@ namespace Items
                     'C',
                     potion_set[1],
                     "hp-regen +5",
-                    10),
+					15),
                 new Consumable( 
                     102,
                     "Mana potion",
@@ -162,7 +162,7 @@ namespace Items
                     'C',
                     potion_set[3],
                     "mp-regen +4",
-                    10),
+                    15),
                 new Item( // elemental dusts
                     200,
                     "Fire dust",

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Fighting;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = System.Object;
 
 namespace Items
 {
@@ -20,9 +20,13 @@ namespace Items
         private Transform _content;
         private RectTransform _contentRect;
         private Scrollbar _scrollbar;
-        private Fighting.Player _player;
+        private Player _player;
         private TextMeshProUGUI _playerStatsText;
         private GameObject _tooltip;
+        private Tooltip _tooltipScript;
+        private GameObject _itemPrefab;
+        private (Transform neck, Transform chest, Transform wand) _stuff;
+        
 
         private const KeyCode Key = KeyCode.I;
 
@@ -54,8 +58,16 @@ namespace Items
             _player = GetComponent<Fighting.Player>();
             _playerStatsText = canvas.transform.Find("Stats Panel").Find("Player Stats").GetComponent<TextMeshProUGUI>();
             _tooltip = canvas.transform.Find("Tooltip").gameObject;
+            _tooltipScript = _tooltip.GetComponent<Tooltip>();
             _tooltip.SetActive(false);
             canvas.SetActive(false);
+            _itemPrefab = Resources.Load("Prefabs/Item") as GameObject;
+            _stuff = (
+                canvas.transform.Find("Stuff").Find("Neck"),
+                canvas.transform.Find("Stuff").Find("Chest"),
+                canvas.transform.Find("Stuff").Find("Wand")
+            );
+            _player.OnEquipmentUpdate += UpdatePlayerEquipment;
 
             Loot(0,1,2,3,4,5,6,7,8,9,10,11,12,100,101,102,103,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224);
             var indexing = canvas.transform.Find("Indexing").transform;
@@ -64,9 +76,9 @@ namespace Items
             indexing.Find("Equipment").GetComponent<Button>().onClick.AddListener(() => Filter("equipment"));
             indexing.Find("Resource").GetComponent<Button>().onClick.AddListener(() => Filter("resource"));
             var sorting = canvas.transform.Find("Sorting").transform;
-            sorting.Find("ByName").GetComponent<Button>().onClick.AddListener(() => Sort("name"));
-            sorting.Find("ByTier").GetComponent<Button>().onClick.AddListener(() => Sort("tier"));
-            sorting.Find("ByAmount").GetComponent<Button>().onClick.AddListener(() => Sort("amount"));
+            sorting.Find("ByName").GetComponent<Button>().onClick.AddListener(() => CallSort("name"));
+            sorting.Find("ByTier").GetComponent<Button>().onClick.AddListener(() => CallSort("tier"));
+            sorting.Find("ByAmount").GetComponent<Button>().onClick.AddListener(() => CallSort("amount"));
         }
         
         private void Filter(string filt)
@@ -75,13 +87,19 @@ namespace Items
             UpdateDisplay();
         }
 
-        private void Sort(string sortKey)
+        private void CallSort(string sortKey)
         {
-            if (_showing && sortKey == _sort)
+            if (sortKey == _sort)
                 _ascending = !_ascending;
-            var order = _ascending ? 1 : -1;
             _sort = sortKey;
-            
+            Sort();
+            UpdateDisplay();
+        }
+        
+        private void Sort()
+        {
+            var order = _ascending ? 1 : -1;
+
             var sorting  = _sort switch
             {
                 "name" => (Comparison<(Item item, int amount)>) ((a, b)
@@ -97,7 +115,6 @@ namespace Items
                 _ => throw new ArgumentException("Invalid sort key")
             };
             _items.Sort(sorting);
-            UpdateDisplay();
         }
 
         public void Loot(int itemId, int amount)
@@ -115,6 +132,22 @@ namespace Items
                     _items.Add((item, amount));
                 else
                     _items[index] = (item, _items[index].amount + amount);
+            }
+            if (_showing)
+                UpdateDisplay();
+        }
+
+        public void Loot(Item item)
+        {
+            if (item is Equipment)
+                _items.Add((item, 1));
+            else
+            {
+                var index = _items.FindIndex(i => i.item.Id == item.Id);
+                if (index == -1)
+                    _items.Add((item, 1));
+                else
+                    _items[index] = (item, _items[index].amount + 1);
             }
             if (_showing)
                 UpdateDisplay();
@@ -141,13 +174,25 @@ namespace Items
         public bool Remove(int itemId, int amount)
         {
             var index = _items.FindIndex(i => i.item.Id == itemId);
-            if (index == -1)
+            if (index == -1 || _items[index].amount < amount)
                 return false;
+            
             if (_items[index].amount == amount)
                 _items.RemoveAt(index);
-            else if (_items[index].amount < amount)
-                return false;
             else _items[index] = (_items[index].item, _items[index].amount - amount);
+            if (_showing)
+                UpdateDisplay();
+            return true;
+        }
+
+        public bool Remove(Equipment item)
+        {
+            var index = _items.FindIndex(i => i.item is Equipment e && Object.ReferenceEquals(e, item));
+            if (index == -1)
+                return false;
+            _items.RemoveAt(index);
+            if (_showing)
+                UpdateDisplay();
             return true;
         }
         
@@ -161,7 +206,7 @@ namespace Items
         {
             canvas.SetActive(true);
             UpdatePlayerStats();
-            Sort(_sort);
+            UpdateDisplay();
             _showing = true;
             _player.OnStatsUpdate += UpdatePlayerStats;
         }
@@ -175,6 +220,7 @@ namespace Items
             
         private void UpdateDisplay()
         {
+            Sort();
             _tooltip.SetActive(true);
             var nbRows = (Items.Count - 1) / 6 + 1;
             // Set the content's height to the number of rows
@@ -185,11 +231,11 @@ namespace Items
             foreach (var (item, amount) in Items)
             {
                 // Instantiate Item Prefab as GameObject and set its parent to the content
-                var instance = Instantiate(Resources.Load("Prefabs/Item"), _content) as GameObject;
-                if (instance is null)
-                    throw new Exception("Item prefab not found!");
+                var instance = Instantiate(_itemPrefab, _content);
                 // Set the item's name and amount
-                instance.GetComponent<UIItem>().SetItem(item, amount);
+                var uiItem = instance.GetComponent<UIItem>();
+                uiItem.SetItem(item, amount);
+                uiItem.tooltip = _tooltipScript;
             }
 
             // change scroll steps in scrollbar
@@ -200,6 +246,23 @@ namespace Items
         private void UpdatePlayerStats()
         {
             _playerStatsText.text = _player.GetStatsString();
+        }
+        
+        private void UpdatePlayerEquipment()
+        {
+            var slots = new[] { _stuff.neck, _stuff.chest, _stuff.wand };
+            var equipment = new[] { _player.Equipment.necklace, _player.Equipment.robe, _player.Equipment.wand };
+            for (var i = 0; i < 3; i++)
+            {
+                var eq = equipment[i];
+                var slot = slots[i];
+                foreach (Transform o in slot)
+                    Destroy(o.gameObject);
+                if (eq is null) continue;
+                var uiItem = Instantiate(_itemPrefab, slot).GetComponent<UIItem>();
+                uiItem.SetItem(eq, 1);
+                uiItem.tooltip = _tooltipScript;
+            }
         }
 
         public List<(int, int)> ToSave()

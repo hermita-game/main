@@ -56,7 +56,7 @@ namespace Items
     public class Equipment : Item
     {
         public readonly Stats BaseStats;
-        public StuffType StuffType;
+        public readonly StuffType StuffType;
         public int Seed = 0;
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, StuffType type,  string stats)
@@ -65,17 +65,12 @@ namespace Items
             BaseStats = new Stats(stats);
             StuffType = type;
         }
-        
-        public Equipment(int id, string name, string description, char tier, Sprite icon, Stats stats)
+
+        private Equipment(int id, string name, string description, int tier, Sprite icon, StuffType type, Stats stats)
             : base(id, name, description, tier, icon)
         {
             BaseStats = stats;
-        }
-        
-        private Equipment(int id, string name, string description, int tier, Sprite icon, Stats stats)
-            : base(id, name, description, tier, icon)
-        {
-            BaseStats = stats;
+            StuffType = type;
         }
 
         public Equipment GetEquipmentInstance(int seed)
@@ -86,7 +81,7 @@ namespace Items
             var newStats = new Stats();
             foreach (var (key, type, val) in BaseStats)
                 newStats[key] = (type, val * (1 + (float) random.NextDouble() * delta * 2 - delta));
-            return new Equipment(Id, Name, Description, Tier, Icon, newStats);
+            return new Equipment(Id, Name, Description, Tier, Icon, StuffType, newStats);
         }
     }
     
