@@ -1,7 +1,13 @@
+- GitHub organization : https://github.com/hermita-game
+
 # Website
 
-The website is a submodule in the git tree. [(see)](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
+- repo : https://github.com/hermita-game/hermita-game.github.io
 
-Note that when you clone the main game repository, you will need to use the --recursive flag to also clone the submodule repositories. You can also update the submodule to the latest commit by navigating to the submodule directory and running git pull.
+# Game
 
-To update the submodules: `git submodule update --remote --merge`
+- repo : https://github.com/hermita-game/main
+
+# Docs
+
+- repo : https://github.com/hermita-game/docs
