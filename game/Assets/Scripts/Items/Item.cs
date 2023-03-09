@@ -13,12 +13,11 @@ namespace Items
 
     public class Item
     {
-        public int Id;
-        public string Name;
-        public string Description;
-        public int Tier;
-        public Sprite Icon;
-        
+        public readonly int Id;
+        public readonly string Name;
+        public readonly string Description;
+        public readonly int Tier;
+        public readonly Sprite Icon;
         
         public Item(int id, string name, string description, char tier, Sprite icon)
         {
@@ -57,7 +56,7 @@ namespace Items
     {
         public readonly Stats BaseStats;
         public readonly StuffType StuffType;
-        public int Seed = 0;
+        public int Seed;
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, StuffType type,  string stats)
             : base(id, name, description, tier, icon)
@@ -88,7 +87,7 @@ namespace Items
     public class Consumable : Item
     {
         public readonly Stats Stats;
-        public int Duration = 0; // seconds
+        public readonly int Duration; // seconds
 
         public Consumable(int id, string name, string description, char tier, Sprite icon, string stats)
             : base(id, name, description, tier, icon)
