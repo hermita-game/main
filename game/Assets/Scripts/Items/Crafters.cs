@@ -10,4 +10,12 @@ namespace Items
         Workshop,
         Workbench
     }
+
+    public enum CraftType
+    {
+        Wand,
+        Necklace,
+        Robe,
+        Potion
+    }
 }

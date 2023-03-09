@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace Items
 {
@@ -12,8 +10,9 @@ namespace Items
         public int ItemId;
         public List<(int itemId, int amount)> Ingredients;
         public (int level, BuildingType building) Requirements;
+        public CraftType craftType;
 
-        public Recipe(int id, string building, int result, List<(int itemId, int amount)> ingredientsIds)
+        public Recipe(int id, string building, int result, List<(int itemId, int amount)> ingredientsIds, string crafttype)
         {
             Id = id;
             ItemId = result;
@@ -28,6 +27,14 @@ namespace Items
             };
             var level = int.Parse(buildInfo[1]);
             Requirements = (level, buildingType);
+            var craftType = crafttype.Trim() switch
+            {
+                "wand" => CraftType.Wand,
+                "necklace" => CraftType.Necklace,
+                "robe" => CraftType.Robe,
+                "potion" => CraftType.Potion,
+                _ => throw new ArgumentException("Invalid crafttype")
+            };
         }
         
         public List<(int item, int amount)> GetMissingIngredients(List<Item> inventory)

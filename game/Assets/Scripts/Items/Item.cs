@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Fighting;
 using UnityEngine;
 
@@ -10,18 +7,17 @@ namespace Items
     public enum StuffType
     {
         Wand,
-        Armor,
+        Robe,
         Necklace
     }
 
     public class Item
     {
-        public int Id;
-        public string Name;
-        public string Description;
-        public int Tier;
-        public Sprite Icon;
-        
+        public readonly int Id;
+        public readonly string Name;
+        public readonly string Description;
+        public readonly int Tier;
+        public readonly Sprite Icon;
         
         public Item(int id, string name, string description, char tier, Sprite icon)
         {
@@ -58,8 +54,9 @@ namespace Items
 
     public class Equipment : Item
     {
-        public Stats BaseStats;
-        public StuffType StuffType;
+        public readonly Stats BaseStats;
+        public readonly StuffType StuffType;
+        public int Seed;
         
         public Equipment(int id, string name, string description, char tier, Sprite icon, StuffType type,  string stats)
             : base(id, name, description, tier, icon)
@@ -67,55 +64,30 @@ namespace Items
             BaseStats = new Stats(stats);
             StuffType = type;
         }
-        
-        public Equipment(int id, string name, string description, char tier, Sprite icon, Stats stats)
+
+        private Equipment(int id, string name, string description, int tier, Sprite icon, StuffType type, Stats stats)
             : base(id, name, description, tier, icon)
         {
             BaseStats = stats;
-        }
-        
-        private Equipment(int id, string name, string description, int tier, Sprite icon, Stats stats)
-            : base(id, name, description, tier, icon)
-        {
-            BaseStats = stats;
+            StuffType = type;
         }
 
         public Equipment GetEquipmentInstance(int seed)
         {
+            Seed = seed;
             const float delta = 0.05f; // +-5% of base stat
             var random = new System.Random(seed);
             var newStats = new Stats();
-            foreach (var (key, (type, val)) in BaseStats.GetStats())
+            foreach (var (key, type, val) in BaseStats)
                 newStats[key] = (type, val * (1 + (float) random.NextDouble() * delta * 2 - delta));
-            return new Equipment(Id, Name, Description, Tier, Icon, newStats);
-        }
-        
-        public static void Apply(Stats player, List<Stats> equipment)
-        {
-            // Packing effects
-            var (percents, flats) = (new Stats(), new Stats());
-            foreach (var stats in equipment)
-            {
-                foreach (var (stat, (type, val)) in stats.GetStats())
-                {
-                    if (type == Stats.Type.Percent)
-                        percents[stat] = (Stats.Type.Percent, percents[stat].val + val);
-                    else
-                        flats[stat] = (Stats.Type.Flat, flats[stat].val + val);
-                }
-            }
-            
-            // Applying effects
-            foreach (var (stat, (type, val)) in percents.GetStats())
-                player[stat] = (Stats.Type.Flat, player[stat].val + player[stat].val * val / 100);
-            foreach (var (stat, (type, val)) in flats.GetStats())
-                player[stat] = (Stats.Type.Flat, player[stat].val + val);
+            return new Equipment(Id, Name, Description, Tier, Icon, StuffType, newStats);
         }
     }
     
     public class Consumable : Item
     {
-        public Stats Stats;
+        public readonly Stats Stats;
+        public readonly int Duration; // seconds
 
         public Consumable(int id, string name, string description, char tier, Sprite icon, string stats)
             : base(id, name, description, tier, icon)
@@ -123,15 +95,11 @@ namespace Items
             Stats = new Stats(stats);
         }
         
-        public void Use(Stats stats, Stats maxStats)
+        public Consumable(int id, string name, string description, char tier, Sprite icon, string stats, int duration)
+            : base(id, name, description, tier, icon)
         {
-            foreach (var (stat, (type, val)) in Stats.GetStats())
-            {
-                if (type == Stats.Type.Flat)
-                    stats[stat] = (Stats.Type.Flat, stats[stat].val + val);
-                else
-                    stats[stat] = (Stats.Type.Flat, stats[stat].val + maxStats[stat].val * val / 100);
-            }
+            Stats = new Stats(stats);
+            Duration = duration;
         }
     }
 }
